@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'r
 import { useAuth } from './context/AuthContext'
 import LoginPage from './components/pages/auth/LoginPage'
 import SignupPage from './components/pages/auth/SignupPage'
+import AuthCallback from './components/pages/auth/AuthCallback'
 import Dashboard from './components/Dashboard'
 import './App.css'
 
@@ -15,12 +16,12 @@ function AuthRoutes() {
   console.log('AuthRoutes - Loading:', loading, 'User:', user, 'Path:', location.pathname)
 
   // Show loading only on protected routes when authentication is in progress
-  if (loading && location.pathname !== '/login' && location.pathname !== '/signup') {
+  if (loading && location.pathname !== '/login' && location.pathname !== '/signup' && location.pathname !== '/auth/callback') {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         height: '100vh',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         color: 'white',
@@ -36,21 +37,25 @@ function AuthRoutes() {
 
   return (
     <Routes>
-      <Route 
-        path="/login" 
-        element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />} 
+      <Route
+        path="/login"
+        element={!user ? <LoginPage /> : <Navigate to="/dashboard" replace />}
       />
-      <Route 
-        path="/signup" 
-        element={!user ? <SignupPage /> : <Navigate to="/dashboard" replace />} 
+      <Route
+        path="/signup"
+        element={!user ? <SignupPage /> : <Navigate to="/dashboard" replace />}
       />
-      <Route 
-        path="/dashboard" 
-        element={user ? <Dashboard /> : <Navigate to="/login" replace />} 
+      <Route
+        path="/dashboard"
+        element={user ? <Dashboard /> : <Navigate to="/login" replace />}
       />
-      <Route 
-        path="/" 
-        element={<Navigate to={user ? "/dashboard" : "/login"} replace />} 
+      <Route
+        path="/auth/callback"
+        element={<AuthCallback />}
+      />
+      <Route
+        path="/"
+        element={<Navigate to={user ? "/dashboard" : "/login"} replace />}
       />
     </Routes>
   )

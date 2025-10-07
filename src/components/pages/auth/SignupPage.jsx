@@ -24,6 +24,8 @@ const SignupPage = () => {
       ...prev,
       [name]: value
     }))
+    // Clear errors when user starts typing
+    if (error) setError('')
   }
 
   const handleSignup = async (e) => {
@@ -54,18 +56,47 @@ const SignupPage = () => {
     setSuccess('')
 
     try {
-      const { error } = await signUp(formData.email, formData.password)
+      const { data, error } = await signUp(formData.email, formData.password)
+      
       if (error) {
-        setError(error.message || 'Failed to create account')
+        // Handle specific signup errors
+        if (error.message.includes('User already registered')) {
+          setError('An account with this email already exists. Please try logging in instead.')
+        } else if (error.message.includes('Password')) {
+          setError('Password is too weak. Please choose a stronger password.')
+        } else {
+          setError(error.message || 'Failed to create account')
+        }
       } else {
-        setSuccess('Account created successfully!')
-        setTimeout(() => {
-          navigate('/dashboard')
-        }, 2000)
+        // Check if email confirmation is required
+        if (data?.user?.identities?.length === 0) {
+          setError('An account with this email already exists. Please try logging in.')
+          return
+        }
+
+        if (data?.user?.confirmed_at) {
+          // User is immediately confirmed (if email confirmations are off)
+          setSuccess('Account created successfully! Redirecting to dashboard...')
+          setTimeout(() => {
+            navigate('/dashboard')
+          }, 2000)
+        } else {
+          // Email confirmation required
+          setSuccess(`Welcome to VitaHealth, ${formData.firstName}! Please check your email (${formData.email}) to verify your account.`)
+          
+          // Clear form after successful signup
+          setFormData({
+            firstName: '',
+            lastName: '',
+            email: '',
+            password: '',
+            confirmPassword: '',
+          })
+        }
       }
     } catch (err) {
       console.error('Signup error:', err)
-      setError('An unexpected error occurred during signup')
+      setError('An unexpected error occurred during signup. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -168,12 +199,13 @@ const SignupPage = () => {
                   placeholder="Password (min.6 chars)"
                   required
                 />
-                <i
+                <button
+                  type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className={`absolute inset-y-0 right-0 pr-8 flex items-center cursor-pointer text-gray-400 hover:text-gray-600 transition-colors duration-200 ${showPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'
-                    }`}
-                ></i>
-
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
               </div>
             </div>
 
@@ -197,23 +229,38 @@ const SignupPage = () => {
 
             {/* Messages */}
             {error && (
-              <div className="rounded-xl bg-red-50 border border-red-200 p-4">
-                <div className="flex items-center">
-                  <svg className="h-5 w-5 text-red-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="rounded-xl bg-red-50 border border-red-200 p-4 animate-in fade-in-50">
+                <div className="flex items-start">
+                  <svg className="h-5 w-5 text-red-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="text-sm text-red-700">{error}</span>
+                  <div>
+                    <span className="text-sm font-medium text-red-800 block mb-1">Signup Error</span>
+                    <span className="text-sm text-red-700">{error}</span>
+                    {error.includes('already exists') && (
+                      <div className="mt-2 text-xs text-red-600">
+                        <Link to="/login" className="underline hover:text-red-800">
+                          Click here to login instead
+                        </Link>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
 
             {success && (
-              <div className="rounded-xl bg-green-50 border border-green-200 p-4">
-                <div className="flex items-center">
-                  <svg className="h-5 w-5 text-green-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="rounded-xl bg-green-50 border border-green-200 p-4 animate-in fade-in-50">
+                <div className="flex items-start">
+                  <svg className="h-5 w-5 text-green-400 mr-2 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="text-sm text-green-700">{success}</span>
+                  <div>
+                    <span className="text-sm font-medium text-green-800 block mb-1">
+                      {success.includes('check your email') ? 'Almost There!' : 'Success!'}
+                    </span>
+                    <span className="text-sm text-green-700">{success}</span>
+                  </div>
                 </div>
               </div>
             )}
@@ -222,7 +269,7 @@ const SignupPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform disabled:transform-none"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -247,6 +294,7 @@ const SignupPage = () => {
               </Link>
             </p>
           </div>
+
         </div>
       </div>
     </div>
