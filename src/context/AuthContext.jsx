@@ -100,11 +100,90 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  // Health Records Functions
+  const saveHealthRecord = async (healthData) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase
+        .from('health_records')
+        .insert({
+          user_id: user.id,
+          bmi: healthData.bmi,
+          bmi_category: healthData.bmiCategory,
+          symptoms: healthData.symptoms,
+          ai_health_advice: healthData.aiHealthAdvice,
+          medicine_suggestions: healthData.medicineSuggestions,
+          organic_remedies: healthData.organicRemedies,
+          nearby_hospitals: healthData.nearbyHospitals,
+          location: healthData.location
+        })
+        .select()
+
+      if (error) throw error
+      return { data, error: null }
+    } catch (error) {
+      console.error('Error saving health record:', error)
+      return { data: null, error }
+    }
+  }
+
+  const getHealthRecords = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase
+        .from('health_records')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return { data, error: null }
+    } catch (error) {
+      console.error('Error fetching health records:', error)
+      return { data: null, error }
+    }
+  }
+
+  const deleteHealthRecord = async (recordId) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+
+      const { data, error } = await supabase
+        .from('health_records')
+        .delete()
+        .eq('id', recordId)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+      return { data, error: null }
+    } catch (error) {
+      console.error('Error deleting health record:', error)
+      return { data: null, error }
+    }
+  }
+
   const value = {
     user,
     signUp,
     signIn,
     signOut,
+    saveHealthRecord,
+    getHealthRecords,
+    deleteHealthRecord,
     loading: loading || authLoading
   }
 

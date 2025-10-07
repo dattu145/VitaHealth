@@ -170,7 +170,7 @@ const SignupPage = () => {
                 />
                 <i
                   onClick={() => setShowPassword(!showPassword)}
-                  className={`absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-gray-400 hover:text-gray-600 transition-colors duration-200 ${showPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'
+                  className={`absolute inset-y-0 right-0 pr-8 flex items-center cursor-pointer text-gray-400 hover:text-gray-600 transition-colors duration-200 ${showPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'
                     }`}
                 ></i>
 

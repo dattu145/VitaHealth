@@ -1,5 +1,6 @@
 // src/components/steps/step3.jsx
 import React, { useState, useEffect } from 'react'
+import { useAuth } from '../../context/AuthContext'
 
 const Step3 = ({ userData, prevStep }) => {
   const [bmiData, setBmiData] = useState({})
@@ -10,6 +11,8 @@ const Step3 = ({ userData, prevStep }) => {
   const [hospitalResponse, setHospitalResponse] = useState('')
   const [location, setLocation] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
   const [typingComplete, setTypingComplete] = useState({
     health: false,
     medicine: false,
@@ -18,6 +21,7 @@ const Step3 = ({ userData, prevStep }) => {
   })
 
   const API_KEY = import.meta.env.VITE_GEMINI_API_KEY
+  const { saveHealthRecord } = useAuth()
 
   useEffect(() => {
     calculateBMI()
@@ -178,6 +182,34 @@ const Step3 = ({ userData, prevStep }) => {
     })
   }
 
+  const saveHealthData = async () => {
+    setSaving(true)
+    try {
+      const healthData = {
+        bmi: parseFloat(bmiData.bmi),
+        bmiCategory: bmiData.category,
+        symptoms: healthProblem,
+        aiHealthAdvice: aiResponse,
+        medicineSuggestions: medicineResponse,
+        organicRemedies: organicResponse,
+        nearbyHospitals: hospitalResponse,
+        location: location ? `${location.latitude}, ${location.longitude}` : null
+      }
+
+      const { error } = await saveHealthRecord(healthData)
+      
+      if (error) throw error
+      
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
+    } catch (error) {
+      console.error('Error saving health data:', error)
+      alert('Failed to save health record. Please try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const sendToAI = async () => {
     if (!healthProblem.trim()) {
       alert("Please enter your symptoms.")
@@ -194,6 +226,7 @@ const Step3 = ({ userData, prevStep }) => {
     setMedicineResponse("")
     setOrganicResponse("")
     setHospitalResponse("")
+    setSaveSuccess(false)
     setTypingComplete({
       health: false,
       medicine: false,
@@ -304,6 +337,10 @@ const Step3 = ({ userData, prevStep }) => {
     return 'bg-red-50 border-red-200'
   }
 
+  const canSaveRecord = () => {
+    return aiResponse && medicineResponse && organicResponse && !saving
+  }
+
   return (
     <div 
       className="min-h-screen flex pt-10 items-center justify-center p-4"
@@ -411,6 +448,44 @@ const Step3 = ({ userData, prevStep }) => {
                 )}
               </button>
             </div>
+
+            {/* Save Record Button */}
+            {canSaveRecord() && (
+              <div className="flex justify-center pt-4">
+                <button
+                  type="button"
+                  onClick={saveHealthData}
+                  disabled={saving}
+                  className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  {saving ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Save Health Record</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Save Success Message */}
+            {saveSuccess && (
+              <div className="rounded-xl bg-green-50 border border-green-200 p-4 text-center">
+                <div className="flex items-center justify-center text-green-700">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Health record saved successfully!
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
