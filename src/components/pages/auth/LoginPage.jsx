@@ -133,7 +133,7 @@ const LoginPage = () => {
                 </label>
                 <button
                   type="button"
-                  className="text-sm text-blue-600 hover:text-blue-500 transition-colors duration-200"
+                  className="text-sm text-violet-600 hover:text-blue-500 transition-colors duration-200"
                 >
                   Forgot password?
                 </button>
@@ -151,13 +151,12 @@ const LoginPage = () => {
                   placeholder="Enter your password"
                   required
                 />
-                <button
+                <i
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                  className={`absolute inset-y-0 right-0 pr-8 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200 ${showPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'}`}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
-                </button>
+                </i>
               </div>
             </div>
 
@@ -189,7 +188,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform disabled:transform-none"
+              className="w-full bg-violet-600 hover:bg-violet-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform disabled:transform-none"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -208,19 +207,13 @@ const LoginPage = () => {
               Don't have an account?{' '}
               <Link
                 to="/signup"
-                className="font-medium text-blue-600 hover:text-blue-500 transition-colors duration-200"
+                className="font-medium text-violet-600 hover:text-violet-500 transition-colors duration-200"
               >
                 Sign up
               </Link>
             </p>
           </div>
 
-          {/* Debug info (remove in production) */}
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-            <p className="text-xs text-gray-500 text-center">
-              <strong>Note:</strong> Enter wrong credentials to test error messages
-            </p>
-          </div>
         </div>
       </div>
     </div>

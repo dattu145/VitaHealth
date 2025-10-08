@@ -57,7 +57,7 @@ const SignupPage = () => {
 
     try {
       const { data, error } = await signUp(formData.email, formData.password)
-      
+
       if (error) {
         // Handle specific signup errors
         if (error.message.includes('User already registered')) {
@@ -83,7 +83,7 @@ const SignupPage = () => {
         } else {
           // Email confirmation required
           setSuccess(`Welcome to VitaHealth, ${formData.firstName}! Please check your email (${formData.email}) to verify your account.`)
-          
+
           // Clear form after successful signup
           setFormData({
             firstName: '',
@@ -199,13 +199,12 @@ const SignupPage = () => {
                   placeholder="Password (min.6 chars)"
                   required
                 />
-                <button
+                <i
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                  className={`absolute inset-y-0 right-0 pr-8 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200 ${showPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'}`}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
-                </button>
+                </i>
               </div>
             </div>
 
@@ -269,7 +268,7 @@ const SignupPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform disabled:transform-none"
+              className="w-full bg-violet-600 hover:bg-violet-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed transform disabled:transform-none"
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -288,7 +287,7 @@ const SignupPage = () => {
               Already have an account?{' '}
               <Link
                 to="/login"
-                className="font-medium text-green-600 hover:text-green-500 transition-colors duration-200"
+                className="font-medium text-violet-600 hover:text-violet-500 transition-colors duration-200"
               >
                 Sign in
               </Link>
